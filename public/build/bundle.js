@@ -6415,6 +6415,7 @@ var app = (function () {
   }
 
   const config = {
+    // eslint-disable-line
     domain: 'dev-abo1i4dg.us.auth0.com',
     clientId: 'BltqLYYrutovy9QhZpAG7rbUInR8w752',
   };

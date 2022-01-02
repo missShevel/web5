@@ -16,7 +16,7 @@
     "sourceType": "module",
     "requireConfigFile": false
   },
-  "rules": {},
+  "rules": { "no-undef": "off" },
   "ignorePatterns": ["/public/build/*.js"],
   "parser": "@babel/eslint-parser"
 }

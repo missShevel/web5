@@ -1,9 +1,9 @@
 <script>
-  import requestRunner from "./requests/requests-runner";
-  import { OperationsDocsHelper } from "./requests/operation-docs-helper";
-  import { onMount } from "svelte";
-  import { isAuthenticated, user, notes, token } from "./store";
-  import auth from "./auth_service";
+  import requestRunner from './requests/requests-runner';
+  import { OperationsDocsHelper } from './requests/operation-docs-helper';
+  import { onMount } from 'svelte';
+  import { isAuthenticated, user, notes, token } from './store';
+  import auth from './auth_service';
   let auth0Client;
 
   onMount(async () => {
@@ -20,7 +20,7 @@
   token.subscribe(async (value) => {
     if (value) {
       const result = await requestRunner.startFetchMyQuery(
-        OperationsDocsHelper.QUERY_GetAll()
+        OperationsDocsHelper.QUERY_GetAll(),
       );
       notes.set(result.notes_notes);
     }
@@ -35,32 +35,32 @@
   }
 
   const addNote = async () => {
-    const title = prompt("Note title") ?? "";
-    const status = prompt("Task status") ?? "";
-    if (title === "") return;
+    const title = prompt('Note title') ?? '';
+    const status = prompt('Task status') ?? '';
+    if (title === '') return;
     const { insert_notes_notes } = await requestRunner.startExecuteMyMutation(
-      OperationsDocsHelper.MUTATION_InsertOne(title, status)
+      OperationsDocsHelper.MUTATION_InsertOne(title, status),
     );
     notes.update((newNote) => [...newNote, insert_notes_notes.returning[0]]);
   };
 
   const deleteNote = async () => {
-    const noteNumber = prompt("Notes' number to be deleted: " ?? "");
+    const noteNumber = prompt("Notes' number to be deleted: " ?? '');
     await requestRunner.startExecuteMyMutation(
       OperationsDocsHelper.MUTATION_DeleteByNumber(),
       {
         number: parseInt(noteNumber),
-      }
+      },
     );
     notes.update((deletedNote) =>
-      deletedNote.filter((item) => item.number != noteNumber)
+      deletedNote.filter((item) => item.number != noteNumber),
     );
   };
 
   function dateDisplay(d) {
-    var datePart = d.substr(0, d.indexOf("T"));
-    var timePart = d.substr(d.indexOf("T") + 1, 5);
-    return datePart + " " + timePart;
+    var datePart = d.substr(0, d.indexOf('T'));
+    var timePart = d.substr(d.indexOf('T') + 1, 5);
+    return datePart + ' ' + timePart;
   }
 </script>
 
@@ -107,7 +107,7 @@
 </main>
 
 <style>
-  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap");
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
 
   .limiter {
     width: 100%;

@@ -2,9 +2,15 @@
   import requestRunner from './requests/requests-runner';
   import { OperationsDocsHelper } from './requests/operation-docs-helper';
   import { onMount } from 'svelte';
-  import { isAuthenticated, user, notes, token } from './store';
+  import { isAuthenticated, user, notes, token, counter, error } from './store';
   import auth from './auth_service';
+  import dayjs from 'dayjs';
   let auth0Client;
+  let online;
+  const inputValues = {
+    add: {},
+    delete: {},
+  };
 
   onMount(async () => {
     auth0Client = await auth.createClient();
@@ -35,17 +41,19 @@
   }
 
   const addNote = async () => {
-    const title = prompt('Note title') ?? '';
-    const status = prompt('Task status') ?? '';
-    if (title === '') return;
-    const { insert_notes_notes } = await requestRunner.startExecuteMyMutation(
-      OperationsDocsHelper.MUTATION_InsertOne(title, status),
-    );
-    notes.update((newNote) => [...newNote, insert_notes_notes.returning[0]]);
+    const { title, status } = inputValues.add;
+    try {
+      const { insert_notes_notes } = await requestRunner.startExecuteMyMutation(
+        OperationsDocsHelper.MUTATION_InsertOne(title, status),
+      );
+      notes.update((newNote) => [...newNote, insert_notes_notes.returning[0]]);
+    } catch (e) {
+      error.set(e.message);
+    }
   };
 
   const deleteNote = async () => {
-    const noteNumber = prompt("Notes' number to be deleted: " ?? '');
+    const { noteNumber } = inputValues.delete;
     await requestRunner.startExecuteMyMutation(
       OperationsDocsHelper.MUTATION_DeleteByNumber(),
       {
@@ -56,51 +64,71 @@
       deletedNote.filter((item) => item.number != noteNumber),
     );
   };
-
-  function dateDisplay(d) {
-    var datePart = d.substr(0, d.indexOf('T'));
-    var timePart = d.substr(d.indexOf('T') + 1, 5);
-    return datePart + ' ' + timePart;
-  }
 </script>
 
+<svelte:window bind:online />
 <main>
-  {#if $isAuthenticated}
-    <div class="limiter">
-      <div class="container-table100">
-        <div class="wrap-table100">
-          <div class="table">
-            <div class="row header">
-              <div class="cell">№</div>
-              <div class="cell">Title</div>
-              <div class="cell">Date</div>
-              <div class="cell">Status</div>
-            </div>
-            {#each $notes as note (note.id)}
-              <div class="row">
-                <div class="cell" data-title="Number">
-                  {note.number}
-                </div>
-                <div class="cell" data-title="Title">
-                  {note.note_title}
-                </div>
-                <div class="cell" data-title="Date">
-                  {dateDisplay(note.creation_time)}
-                </div>
-                <div class="cell" data-title="Status">
-                  {note.status}
-                </div>
+  {#if !online}
+    <h1>You r offline</h1>
+  {:else if $isAuthenticated}
+    {#if !$counter}
+      <div class="limiter">
+        <div class="container-table100">
+          <div class="wrap-table100">
+            <div class="table">
+              <div class="row header">
+                <div class="cell">№</div>
+                <div class="cell">Title</div>
+                <div class="cell">Date</div>
+                <div class="cell">Status</div>
               </div>
-            {/each}
-          </div>
-          <div class="buttons">
-            <button class="btn" on:click={addNote}>Add Note</button>
-            <button class="btn" on:click={deleteNote}>Delete</button>
-            <button class="btn" on:click={logout}>Logout</button>
+              {#each $notes as note (note.id)}
+                <div class="row">
+                  <div class="cell" data-title="Number">
+                    {note.number}
+                  </div>
+                  <div class="cell" data-title="Title">
+                    {note.note_title}
+                  </div>
+                  <div class="cell" data-title="Date">
+                    {dayjs(note.creation_time).format('YYYY-DD-MM HH:MM')}
+                  </div>
+                  <div class="cell" data-title="Status">
+                    {note.status}
+                  </div>
+                </div>
+              {/each}
+            </div>
+            <div class="props">
+              <h4>Add Note</h4>
+              <p>
+                If you want to add new note, please enter it's title and status
+              </p>
+              <input placeholder="Title" bind:value={inputValues.add.title} />
+              <input placeholder="Status" bind:value={inputValues.add.status} />
+              <button class="btn" on:click={addNote}>Add Note</button>
+            </div>
+            <div class="props">
+              <h4>Delete Note</h4>
+              <p>If you want to delete note, please enter it's number</p>
+              <input
+                placeholder="Number"
+                bind:value={inputValues.delete.noteNumber}
+              />
+              <button class="btn" on:click={deleteNote}>Delete</button>
+            </div>
+            <div class="buttons">
+              <button class="btn" on:click={logout}>Logout</button>
+            </div>
+            {#if $error}
+              <h2>{$error}</h2>
+            {/if}
           </div>
         </div>
       </div>
-    </div>
+    {:else}
+      <p>is loading...</p>
+    {/if}
   {:else}
     <button class="btn" on:click={login}>Login</button>
   {/if}
@@ -112,6 +140,29 @@
   .limiter {
     width: 100%;
     margin: 0 auto;
+  }
+
+  h4 {
+    font-family: Poppins, sans-serif;
+    color: #494949;
+    margin: 5px 0;
+  }
+
+  p {
+    font-family: Poppins, sans-serif;
+    font-size: 16px;
+    color: #646464;
+    line-height: 1.2;
+    font-weight: unset !important;
+  }
+
+  input {
+    line-height: 2;
+    border-radius: 10px;
+    margin: 7px 0;
+    padding: 5px;
+    font-family: Poppins, sans-serif;
+    font-size: 16px;
   }
 
   .container-table100 {

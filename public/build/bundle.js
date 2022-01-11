@@ -76,6 +76,9 @@ var app = (function () {
   function space() {
     return text(' ');
   }
+  function empty() {
+    return text('');
+  }
   function listen(node, event, handler, options) {
     node.addEventListener(event, handler, options);
     return () => node.removeEventListener(event, handler, options);
@@ -87,6 +90,9 @@ var app = (function () {
   }
   function children(element) {
     return Array.from(element.childNodes);
+  }
+  function set_input_value(input, value) {
+    input.value = value == null ? '' : value;
   }
   function custom_event(type, detail, bubbles = false) {
     const e = document.createEvent('CustomEvent');
@@ -580,35 +586,44 @@ var app = (function () {
   const isAuthenticated = writable(false);
   const user = writable({});
   const popupOpen = writable(false);
+  const error = writable();
 
   const token = writable('');
+  const counter = writable(0);
 
   class RequestRunner {
     constructor() {
       this.API_URL = 'https://weblabaa5.herokuapp.com/v1/graphql';
     }
     async fetchGraphQL(operationsDoc, operationName, variables) {
-      const result = await fetch(this.API_URL, {
-        method: 'POST',
-        body: JSON.stringify({
-          query: operationsDoc,
-          variables: variables,
-          operationName: operationName,
-        }),
-        headers: { Authorization: `Bearer ${get_store_value(token)}` },
-      });
-      return await result.json();
+      try {
+        const result = await fetch(this.API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            query: operationsDoc,
+            variables: variables,
+            operationName: operationName,
+          }),
+          headers: { Authorization: `Bearer ${get_store_value(token)}` },
+        });
+        return result.json();
+      } catch (e) {
+        console.error(e);
+        throw new Error('Error with request sending');
+      }
     }
     fetchMyQuery(operationsDoc) {
       return this.fetchGraphQL(operationsDoc, 'MyQuery', {});
     }
 
     async startFetchMyQuery(operationsDoc) {
+      counter.update((n) => n + 1);
       const { errors, data } = await this.fetchMyQuery(operationsDoc);
-
+      counter.update((n) => n - 1);
       if (errors) {
         // handle those errors like a pro
         console.error(errors);
+        throw new Error(errors[0].message);
       }
 
       // do something great with this precious data
@@ -621,14 +636,17 @@ var app = (function () {
     }
 
     async startExecuteMyMutation(operationsDoc, variables = {}) {
+      counter.update((n) => n + 1);
       const { errors, data } = await this.executeMyMutation(
         operationsDoc,
         variables,
       );
+      counter.update((n) => n - 1);
 
       if (errors) {
         // handle those errors like a pro
         console.error(errors);
+        throw new Error(errors[0].message);
       }
 
       // do something great with this precious data
@@ -6455,17 +6473,456 @@ var app = (function () {
     logout,
   };
 
+  var commonjsGlobal =
+    typeof globalThis !== 'undefined'
+      ? globalThis
+      : typeof window !== 'undefined'
+      ? window
+      : typeof global !== 'undefined'
+      ? global
+      : typeof self !== 'undefined'
+      ? self
+      : {};
+
+  function createCommonjsModule(fn) {
+    var module = { exports: {} };
+    return fn(module, module.exports), module.exports;
+  }
+
+  var dayjs_min = createCommonjsModule(function (module, exports) {
+    !(function (t, e) {
+      module.exports = e();
+    })(commonjsGlobal, function () {
+      var t = 1e3,
+        e = 6e4,
+        n = 36e5,
+        r = 'millisecond',
+        i = 'second',
+        s = 'minute',
+        u = 'hour',
+        a = 'day',
+        o = 'week',
+        f = 'month',
+        h = 'quarter',
+        c = 'year',
+        d = 'date',
+        $ = 'Invalid Date',
+        l =
+          /^(\d{4})[-/]?(\d{1,2})?[-/]?(\d{0,2})[Tt\s]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?[.:]?(\d+)?$/,
+        y =
+          /\[([^\]]+)]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g,
+        M = {
+          name: 'en',
+          weekdays:
+            'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split(
+              '_',
+            ),
+          months:
+            'January_February_March_April_May_June_July_August_September_October_November_December'.split(
+              '_',
+            ),
+        },
+        m = function (t, e, n) {
+          var r = String(t);
+          return !r || r.length >= e
+            ? t
+            : '' + Array(e + 1 - r.length).join(n) + t;
+        },
+        g = {
+          s: m,
+          z: function (t) {
+            var e = -t.utcOffset(),
+              n = Math.abs(e),
+              r = Math.floor(n / 60),
+              i = n % 60;
+            return (e <= 0 ? '+' : '-') + m(r, 2, '0') + ':' + m(i, 2, '0');
+          },
+          m: function t(e, n) {
+            if (e.date() < n.date()) return -t(n, e);
+            var r = 12 * (n.year() - e.year()) + (n.month() - e.month()),
+              i = e.clone().add(r, f),
+              s = n - i < 0,
+              u = e.clone().add(r + (s ? -1 : 1), f);
+            return +(-(r + (n - i) / (s ? i - u : u - i)) || 0);
+          },
+          a: function (t) {
+            return t < 0 ? Math.ceil(t) || 0 : Math.floor(t);
+          },
+          p: function (t) {
+            return (
+              { M: f, y: c, w: o, d: a, D: d, h: u, m: s, s: i, ms: r, Q: h }[
+                t
+              ] ||
+              String(t || '')
+                .toLowerCase()
+                .replace(/s$/, '')
+            );
+          },
+          u: function (t) {
+            return void 0 === t;
+          },
+        },
+        D = 'en',
+        v = {};
+      v[D] = M;
+      var p = function (t) {
+          return t instanceof _;
+        },
+        S = function (t, e, n) {
+          var r;
+          if (!t) return D;
+          if ('string' == typeof t) v[t] && (r = t), e && ((v[t] = e), (r = t));
+          else {
+            var i = t.name;
+            (v[i] = t), (r = i);
+          }
+          return !n && r && (D = r), r || (!n && D);
+        },
+        w = function (t, e) {
+          if (p(t)) return t.clone();
+          var n = 'object' == typeof e ? e : {};
+          return (n.date = t), (n.args = arguments), new _(n);
+        },
+        O = g;
+      (O.l = S),
+        (O.i = p),
+        (O.w = function (t, e) {
+          return w(t, { locale: e.$L, utc: e.$u, x: e.$x, $offset: e.$offset });
+        });
+      var _ = (function () {
+          function M(t) {
+            (this.$L = S(t.locale, null, !0)), this.parse(t);
+          }
+          var m = M.prototype;
+          return (
+            (m.parse = function (t) {
+              (this.$d = (function (t) {
+                var e = t.date,
+                  n = t.utc;
+                if (null === e) return new Date(NaN);
+                if (O.u(e)) return new Date();
+                if (e instanceof Date) return new Date(e);
+                if ('string' == typeof e && !/Z$/i.test(e)) {
+                  var r = e.match(l);
+                  if (r) {
+                    var i = r[2] - 1 || 0,
+                      s = (r[7] || '0').substring(0, 3);
+                    return n
+                      ? new Date(
+                          Date.UTC(
+                            r[1],
+                            i,
+                            r[3] || 1,
+                            r[4] || 0,
+                            r[5] || 0,
+                            r[6] || 0,
+                            s,
+                          ),
+                        )
+                      : new Date(
+                          r[1],
+                          i,
+                          r[3] || 1,
+                          r[4] || 0,
+                          r[5] || 0,
+                          r[6] || 0,
+                          s,
+                        );
+                  }
+                }
+                return new Date(e);
+              })(t)),
+                (this.$x = t.x || {}),
+                this.init();
+            }),
+            (m.init = function () {
+              var t = this.$d;
+              (this.$y = t.getFullYear()),
+                (this.$M = t.getMonth()),
+                (this.$D = t.getDate()),
+                (this.$W = t.getDay()),
+                (this.$H = t.getHours()),
+                (this.$m = t.getMinutes()),
+                (this.$s = t.getSeconds()),
+                (this.$ms = t.getMilliseconds());
+            }),
+            (m.$utils = function () {
+              return O;
+            }),
+            (m.isValid = function () {
+              return !(this.$d.toString() === $);
+            }),
+            (m.isSame = function (t, e) {
+              var n = w(t);
+              return this.startOf(e) <= n && n <= this.endOf(e);
+            }),
+            (m.isAfter = function (t, e) {
+              return w(t) < this.startOf(e);
+            }),
+            (m.isBefore = function (t, e) {
+              return this.endOf(e) < w(t);
+            }),
+            (m.$g = function (t, e, n) {
+              return O.u(t) ? this[e] : this.set(n, t);
+            }),
+            (m.unix = function () {
+              return Math.floor(this.valueOf() / 1e3);
+            }),
+            (m.valueOf = function () {
+              return this.$d.getTime();
+            }),
+            (m.startOf = function (t, e) {
+              var n = this,
+                r = !!O.u(e) || e,
+                h = O.p(t),
+                $ = function (t, e) {
+                  var i = O.w(
+                    n.$u ? Date.UTC(n.$y, e, t) : new Date(n.$y, e, t),
+                    n,
+                  );
+                  return r ? i : i.endOf(a);
+                },
+                l = function (t, e) {
+                  return O.w(
+                    n
+                      .toDate()
+                      [t].apply(
+                        n.toDate('s'),
+                        (r ? [0, 0, 0, 0] : [23, 59, 59, 999]).slice(e),
+                      ),
+                    n,
+                  );
+                },
+                y = this.$W,
+                M = this.$M,
+                m = this.$D,
+                g = 'set' + (this.$u ? 'UTC' : '');
+              switch (h) {
+                case c:
+                  return r ? $(1, 0) : $(31, 11);
+                case f:
+                  return r ? $(1, M) : $(0, M + 1);
+                case o:
+                  var D = this.$locale().weekStart || 0,
+                    v = (y < D ? y + 7 : y) - D;
+                  return $(r ? m - v : m + (6 - v), M);
+                case a:
+                case d:
+                  return l(g + 'Hours', 0);
+                case u:
+                  return l(g + 'Minutes', 1);
+                case s:
+                  return l(g + 'Seconds', 2);
+                case i:
+                  return l(g + 'Milliseconds', 3);
+                default:
+                  return this.clone();
+              }
+            }),
+            (m.endOf = function (t) {
+              return this.startOf(t, !1);
+            }),
+            (m.$set = function (t, e) {
+              var n,
+                o = O.p(t),
+                h = 'set' + (this.$u ? 'UTC' : ''),
+                $ = ((n = {}),
+                (n[a] = h + 'Date'),
+                (n[d] = h + 'Date'),
+                (n[f] = h + 'Month'),
+                (n[c] = h + 'FullYear'),
+                (n[u] = h + 'Hours'),
+                (n[s] = h + 'Minutes'),
+                (n[i] = h + 'Seconds'),
+                (n[r] = h + 'Milliseconds'),
+                n)[o],
+                l = o === a ? this.$D + (e - this.$W) : e;
+              if (o === f || o === c) {
+                var y = this.clone().set(d, 1);
+                y.$d[$](l),
+                  y.init(),
+                  (this.$d = y.set(d, Math.min(this.$D, y.daysInMonth())).$d);
+              } else $ && this.$d[$](l);
+              return this.init(), this;
+            }),
+            (m.set = function (t, e) {
+              return this.clone().$set(t, e);
+            }),
+            (m.get = function (t) {
+              return this[O.p(t)]();
+            }),
+            (m.add = function (r, h) {
+              var d,
+                $ = this;
+              r = Number(r);
+              var l = O.p(h),
+                y = function (t) {
+                  var e = w($);
+                  return O.w(e.date(e.date() + Math.round(t * r)), $);
+                };
+              if (l === f) return this.set(f, this.$M + r);
+              if (l === c) return this.set(c, this.$y + r);
+              if (l === a) return y(1);
+              if (l === o) return y(7);
+              var M = ((d = {}), (d[s] = e), (d[u] = n), (d[i] = t), d)[l] || 1,
+                m = this.$d.getTime() + r * M;
+              return O.w(m, this);
+            }),
+            (m.subtract = function (t, e) {
+              return this.add(-1 * t, e);
+            }),
+            (m.format = function (t) {
+              var e = this,
+                n = this.$locale();
+              if (!this.isValid()) return n.invalidDate || $;
+              var r = t || 'YYYY-MM-DDTHH:mm:ssZ',
+                i = O.z(this),
+                s = this.$H,
+                u = this.$m,
+                a = this.$M,
+                o = n.weekdays,
+                f = n.months,
+                h = function (t, n, i, s) {
+                  return (t && (t[n] || t(e, r))) || i[n].substr(0, s);
+                },
+                c = function (t) {
+                  return O.s(s % 12 || 12, t, '0');
+                },
+                d =
+                  n.meridiem ||
+                  function (t, e, n) {
+                    var r = t < 12 ? 'AM' : 'PM';
+                    return n ? r.toLowerCase() : r;
+                  },
+                l = {
+                  YY: String(this.$y).slice(-2),
+                  YYYY: this.$y,
+                  M: a + 1,
+                  MM: O.s(a + 1, 2, '0'),
+                  MMM: h(n.monthsShort, a, f, 3),
+                  MMMM: h(f, a),
+                  D: this.$D,
+                  DD: O.s(this.$D, 2, '0'),
+                  d: String(this.$W),
+                  dd: h(n.weekdaysMin, this.$W, o, 2),
+                  ddd: h(n.weekdaysShort, this.$W, o, 3),
+                  dddd: o[this.$W],
+                  H: String(s),
+                  HH: O.s(s, 2, '0'),
+                  h: c(1),
+                  hh: c(2),
+                  a: d(s, u, !0),
+                  A: d(s, u, !1),
+                  m: String(u),
+                  mm: O.s(u, 2, '0'),
+                  s: String(this.$s),
+                  ss: O.s(this.$s, 2, '0'),
+                  SSS: O.s(this.$ms, 3, '0'),
+                  Z: i,
+                };
+              return r.replace(y, function (t, e) {
+                return e || l[t] || i.replace(':', '');
+              });
+            }),
+            (m.utcOffset = function () {
+              return 15 * -Math.round(this.$d.getTimezoneOffset() / 15);
+            }),
+            (m.diff = function (r, d, $) {
+              var l,
+                y = O.p(d),
+                M = w(r),
+                m = (M.utcOffset() - this.utcOffset()) * e,
+                g = this - M,
+                D = O.m(this, M);
+              return (
+                (D =
+                  ((l = {}),
+                  (l[c] = D / 12),
+                  (l[f] = D),
+                  (l[h] = D / 3),
+                  (l[o] = (g - m) / 6048e5),
+                  (l[a] = (g - m) / 864e5),
+                  (l[u] = g / n),
+                  (l[s] = g / e),
+                  (l[i] = g / t),
+                  l)[y] || g),
+                $ ? D : O.a(D)
+              );
+            }),
+            (m.daysInMonth = function () {
+              return this.endOf(f).$D;
+            }),
+            (m.$locale = function () {
+              return v[this.$L];
+            }),
+            (m.locale = function (t, e) {
+              if (!t) return this.$L;
+              var n = this.clone(),
+                r = S(t, e, !0);
+              return r && (n.$L = r), n;
+            }),
+            (m.clone = function () {
+              return O.w(this.$d, this);
+            }),
+            (m.toDate = function () {
+              return new Date(this.valueOf());
+            }),
+            (m.toJSON = function () {
+              return this.isValid() ? this.toISOString() : null;
+            }),
+            (m.toISOString = function () {
+              return this.$d.toISOString();
+            }),
+            (m.toString = function () {
+              return this.$d.toUTCString();
+            }),
+            M
+          );
+        })(),
+        b = _.prototype;
+      return (
+        (w.prototype = b),
+        [
+          ['$ms', r],
+          ['$s', i],
+          ['$m', s],
+          ['$H', u],
+          ['$W', a],
+          ['$M', f],
+          ['$y', c],
+          ['$D', d],
+        ].forEach(function (t) {
+          b[t[1]] = function (e) {
+            return this.$g(e, t[0], t[1]);
+          };
+        }),
+        (w.extend = function (t, e) {
+          return t.$i || (t(e, _, w), (t.$i = !0)), w;
+        }),
+        (w.locale = S),
+        (w.isDayjs = p),
+        (w.unix = function (t) {
+          return w(1e3 * t);
+        }),
+        (w.en = v[D]),
+        (w.Ls = v),
+        (w.p = {}),
+        w
+      );
+    });
+  });
+
   /* src/App.svelte generated by Svelte v3.44.3 */
   const file = 'src/App.svelte';
 
   function get_each_context(ctx, list, i) {
     const child_ctx = ctx.slice();
-    child_ctx[7] = list[i];
+    child_ctx[15] = list[i];
     return child_ctx;
   }
 
-  // (104:2) {:else}
-  function create_else_block(ctx) {
+  // (132:2) {:else}
+  function create_else_block_1(ctx) {
     let button;
     let mounted;
     let dispose;
@@ -6474,8 +6931,8 @@ var app = (function () {
       c: function create() {
         button = element('button');
         button.textContent = 'Login';
-        attr_dev(button, 'class', 'btn svelte-fzxuqv');
-        add_location(button, file, 104, 4, 3213);
+        attr_dev(button, 'class', 'btn svelte-q64nj1');
+        add_location(button, file, 132, 4, 4096);
       },
       m: function mount(target, anchor) {
         insert_dev(target, button, anchor);
@@ -6484,7 +6941,7 @@ var app = (function () {
           dispose = listen_dev(
             button,
             'click',
-            /*login*/ ctx[2],
+            /*login*/ ctx[6],
             false,
             false,
             false,
@@ -6502,20 +6959,136 @@ var app = (function () {
 
     dispatch_dev('SvelteRegisterBlock', {
       block,
-      id: create_else_block.name,
+      id: create_else_block_1.name,
       type: 'else',
-      source: '(104:2) {:else}',
+      source: '(132:2) {:else}',
       ctx,
     });
 
     return block;
   }
 
-  // (68:2) {#if $isAuthenticated}
+  // (73:29)
+  function create_if_block_1(ctx) {
+    let if_block_anchor;
+
+    function select_block_type_1(ctx, dirty) {
+      if (!(/*$counter*/ ctx[3])) return create_if_block_2;
+      return create_else_block;
+    }
+
+    let current_block_type = select_block_type_1(ctx);
+    let if_block = current_block_type(ctx);
+
+    const block = {
+      c: function create() {
+        if_block.c();
+        if_block_anchor = empty();
+      },
+      m: function mount(target, anchor) {
+        if_block.m(target, anchor);
+        insert_dev(target, if_block_anchor, anchor);
+      },
+      p: function update(ctx, dirty) {
+        if (
+          current_block_type ===
+            (current_block_type = select_block_type_1(ctx)) &&
+          if_block
+        ) {
+          if_block.p(ctx, dirty);
+        } else {
+          if_block.d(1);
+          if_block = current_block_type(ctx);
+
+          if (if_block) {
+            if_block.c();
+            if_block.m(if_block_anchor.parentNode, if_block_anchor);
+          }
+        }
+      },
+      d: function destroy(detaching) {
+        if_block.d(detaching);
+        if (detaching) detach_dev(if_block_anchor);
+      },
+    };
+
+    dispatch_dev('SvelteRegisterBlock', {
+      block,
+      id: create_if_block_1.name,
+      type: 'if',
+      source: '(73:29) ',
+      ctx,
+    });
+
+    return block;
+  }
+
+  // (71:2) {#if !online}
   function create_if_block(ctx) {
+    let h1;
+
+    const block = {
+      c: function create() {
+        h1 = element('h1');
+        h1.textContent = 'You r offline';
+        add_location(h1, file, 71, 4, 1892);
+      },
+      m: function mount(target, anchor) {
+        insert_dev(target, h1, anchor);
+      },
+      p: noop,
+      d: function destroy(detaching) {
+        if (detaching) detach_dev(h1);
+      },
+    };
+
+    dispatch_dev('SvelteRegisterBlock', {
+      block,
+      id: create_if_block.name,
+      type: 'if',
+      source: '(71:2) {#if !online}',
+      ctx,
+    });
+
+    return block;
+  }
+
+  // (129:4) {:else}
+  function create_else_block(ctx) {
+    let p;
+
+    const block = {
+      c: function create() {
+        p = element('p');
+        p.textContent = 'is loading...';
+        attr_dev(p, 'class', 'svelte-q64nj1');
+        add_location(p, file, 129, 6, 4051);
+      },
+      m: function mount(target, anchor) {
+        insert_dev(target, p, anchor);
+      },
+      p: noop,
+      d: function destroy(detaching) {
+        if (detaching) detach_dev(p);
+      },
+    };
+
+    dispatch_dev('SvelteRegisterBlock', {
+      block,
+      id: create_else_block.name,
+      type: 'else',
+      source: '(129:4) {:else}',
+      ctx,
+    });
+
+    return block;
+  }
+
+  // (74:4) {#if !$counter}
+  function create_if_block_2(ctx) {
+    let div11;
+    let div10;
     let div9;
-    let div8;
-    let div7;
     let div5;
     let div4;
     let div0;
@@ -6530,16 +7103,33 @@ var app = (function () {
     let each_1_lookup = new Map();
     let t8;
     let div6;
-    let button0;
+    let h40;
     let t10;
-    let button1;
+    let p0;
     let t12;
+    let input0;
+    let t13;
+    let input1;
+    let t14;
+    let button0;
+    let t16;
+    let div7;
+    let h41;
+    let t18;
+    let p1;
+    let t20;
+    let input2;
+    let t21;
+    let button1;
+    let t23;
+    let div8;
     let button2;
+    let t25;
     let mounted;
     let dispose;
-    let each_value = /*$notes*/ ctx[1];
+    let each_value = /*$notes*/ ctx[4];
     validate_each_argument(each_value);
-    const get_key = (ctx) => /*note*/ ctx[7].id;
+    const get_key = (ctx) => /*note*/ ctx[15].id;
     validate_each_keys(ctx, each_value, get_each_context, get_key);
 
     for (let i = 0; i < each_value.length; i += 1) {
@@ -6551,11 +7141,13 @@ var app = (function () {
       );
     }
 
+    let if_block = /*$error*/ ctx[5] && create_if_block_3(ctx);
+
     const block = {
       c: function create() {
+        div11 = element('div');
+        div10 = element('div');
         div9 = element('div');
-        div8 = element('div');
-        div7 = element('div');
         div5 = element('div');
         div4 = element('div');
         div0 = element('div');
@@ -6577,46 +7169,90 @@ var app = (function () {
 
         t8 = space();
         div6 = element('div');
+        h40 = element('h4');
+        h40.textContent = 'Add Note';
+        t10 = space();
+        p0 = element('p');
+        p0.textContent =
+          "If you want to add new note, please enter it's title and status";
+        t12 = space();
+        input0 = element('input');
+        t13 = space();
+        input1 = element('input');
+        t14 = space();
         button0 = element('button');
         button0.textContent = 'Add Note';
-        t10 = space();
+        t16 = space();
+        div7 = element('div');
+        h41 = element('h4');
+        h41.textContent = 'Delete Note';
+        t18 = space();
+        p1 = element('p');
+        p1.textContent = "If you want to delete note, please enter it's number";
+        t20 = space();
+        input2 = element('input');
+        t21 = space();
         button1 = element('button');
         button1.textContent = 'Delete';
-        t12 = space();
+        t23 = space();
+        div8 = element('div');
         button2 = element('button');
         button2.textContent = 'Logout';
-        attr_dev(div0, 'class', 'cell svelte-fzxuqv');
-        add_location(div0, file, 73, 14, 2133);
-        attr_dev(div1, 'class', 'cell svelte-fzxuqv');
-        add_location(div1, file, 74, 14, 2173);
-        attr_dev(div2, 'class', 'cell svelte-fzxuqv');
-        add_location(div2, file, 75, 14, 2217);
-        attr_dev(div3, 'class', 'cell svelte-fzxuqv');
-        add_location(div3, file, 76, 14, 2260);
-        attr_dev(div4, 'class', 'row header svelte-fzxuqv');
-        add_location(div4, file, 72, 12, 2094);
-        attr_dev(div5, 'class', 'table svelte-fzxuqv');
-        add_location(div5, file, 71, 10, 2062);
-        attr_dev(button0, 'class', 'btn svelte-fzxuqv');
-        add_location(button0, file, 96, 12, 2950);
-        attr_dev(button1, 'class', 'btn svelte-fzxuqv');
-        add_location(button1, file, 97, 12, 3019);
-        attr_dev(button2, 'class', 'btn svelte-fzxuqv');
-        add_location(button2, file, 98, 12, 3089);
-        attr_dev(div6, 'class', 'buttons svelte-fzxuqv');
-        add_location(div6, file, 95, 10, 2916);
-        attr_dev(div7, 'class', 'wrap-table100 svelte-fzxuqv');
-        add_location(div7, file, 70, 8, 2024);
-        attr_dev(div8, 'class', 'container-table100 svelte-fzxuqv');
-        add_location(div8, file, 69, 6, 1983);
-        attr_dev(div9, 'class', 'limiter svelte-fzxuqv');
-        add_location(div9, file, 68, 4, 1955);
+        t25 = space();
+        if (if_block) if_block.c();
+        attr_dev(div0, 'class', 'cell svelte-q64nj1');
+        add_location(div0, file, 79, 16, 2159);
+        attr_dev(div1, 'class', 'cell svelte-q64nj1');
+        add_location(div1, file, 80, 16, 2201);
+        attr_dev(div2, 'class', 'cell svelte-q64nj1');
+        add_location(div2, file, 81, 16, 2247);
+        attr_dev(div3, 'class', 'cell svelte-q64nj1');
+        add_location(div3, file, 82, 16, 2292);
+        attr_dev(div4, 'class', 'row header svelte-q64nj1');
+        add_location(div4, file, 78, 14, 2118);
+        attr_dev(div5, 'class', 'table svelte-q64nj1');
+        add_location(div5, file, 77, 12, 2084);
+        attr_dev(h40, 'class', 'svelte-q64nj1');
+        add_location(h40, file, 102, 14, 3041);
+        attr_dev(p0, 'class', 'svelte-q64nj1');
+        add_location(p0, file, 103, 14, 3073);
+        attr_dev(input0, 'placeholder', 'Title');
+        attr_dev(input0, 'class', 'svelte-q64nj1');
+        add_location(input0, file, 106, 14, 3190);
+        attr_dev(input1, 'placeholder', 'Status');
+        attr_dev(input1, 'class', 'svelte-q64nj1');
+        add_location(input1, file, 107, 14, 3269);
+        attr_dev(button0, 'class', 'btn svelte-q64nj1');
+        add_location(button0, file, 108, 14, 3350);
+        attr_dev(div6, 'class', 'props');
+        add_location(div6, file, 101, 12, 3007);
+        attr_dev(h41, 'class', 'svelte-q64nj1');
+        add_location(h41, file, 111, 14, 3472);
+        attr_dev(p1, 'class', 'svelte-q64nj1');
+        add_location(p1, file, 112, 14, 3507);
+        attr_dev(input2, 'placeholder', 'Number');
+        attr_dev(input2, 'class', 'svelte-q64nj1');
+        add_location(input2, file, 113, 14, 3581);
+        attr_dev(button1, 'class', 'btn svelte-q64nj1');
+        add_location(button1, file, 117, 14, 3715);
+        attr_dev(div7, 'class', 'props');
+        add_location(div7, file, 110, 12, 3438);
+        attr_dev(button2, 'class', 'btn svelte-q64nj1');
+        add_location(button2, file, 120, 14, 3840);
+        attr_dev(div8, 'class', 'buttons svelte-q64nj1');
+        add_location(div8, file, 119, 12, 3804);
+        attr_dev(div9, 'class', 'wrap-table100 svelte-q64nj1');
+        add_location(div9, file, 76, 10, 2044);
+        attr_dev(div10, 'class', 'container-table100 svelte-q64nj1');
+        add_location(div10, file, 75, 8, 2001);
+        attr_dev(div11, 'class', 'limiter svelte-q64nj1');
+        add_location(div11, file, 74, 6, 1971);
       },
       m: function mount(target, anchor) {
-        insert_dev(target, div9, anchor);
-        append_dev(div9, div8);
-        append_dev(div8, div7);
-        append_dev(div7, div5);
+        insert_dev(target, div11, anchor);
+        append_dev(div11, div10);
+        append_dev(div10, div9);
+        append_dev(div9, div5);
         append_dev(div5, div4);
         append_dev(div4, div0);
         append_dev(div4, t1);
@@ -6631,28 +7267,52 @@ var app = (function () {
           each_blocks[i].m(div5, null);
         }
 
-        append_dev(div7, t8);
-        append_dev(div7, div6);
-        append_dev(div6, button0);
+        append_dev(div9, t8);
+        append_dev(div9, div6);
+        append_dev(div6, h40);
         append_dev(div6, t10);
-        append_dev(div6, button1);
+        append_dev(div6, p0);
         append_dev(div6, t12);
-        append_dev(div6, button2);
+        append_dev(div6, input0);
+        set_input_value(input0, /*inputValues*/ ctx[1].add.title);
+        append_dev(div6, t13);
+        append_dev(div6, input1);
+        set_input_value(input1, /*inputValues*/ ctx[1].add.status);
+        append_dev(div6, t14);
+        append_dev(div6, button0);
+        append_dev(div9, t16);
+        append_dev(div9, div7);
+        append_dev(div7, h41);
+        append_dev(div7, t18);
+        append_dev(div7, p1);
+        append_dev(div7, t20);
+        append_dev(div7, input2);
+        set_input_value(input2, /*inputValues*/ ctx[1].delete.noteNumber);
+        append_dev(div7, t21);
+        append_dev(div7, button1);
+        append_dev(div9, t23);
+        append_dev(div9, div8);
+        append_dev(div8, button2);
+        append_dev(div9, t25);
+        if (if_block) if_block.m(div9, null);
 
         if (!mounted) {
           dispose = [
+            listen_dev(input0, 'input', /*input0_input_handler*/ ctx[11]),
+            listen_dev(input1, 'input', /*input1_input_handler*/ ctx[12]),
             listen_dev(
               button0,
               'click',
-              /*addNote*/ ctx[4],
+              /*addNote*/ ctx[8],
               false,
               false,
               false,
             ),
+            listen_dev(input2, 'input', /*input2_input_handler*/ ctx[13]),
             listen_dev(
               button1,
               'click',
-              /*deleteNote*/ ctx[5],
+              /*deleteNote*/ ctx[9],
               false,
               false,
               false,
@@ -6660,7 +7320,7 @@ var app = (function () {
             listen_dev(
               button2,
               'click',
-              /*logout*/ ctx[3],
+              /*logout*/ ctx[7],
               false,
               false,
               false,
@@ -6671,8 +7331,8 @@ var app = (function () {
         }
       },
       p: function update(ctx, dirty) {
-        if (dirty & /*$notes, dateDisplay*/ 2) {
-          each_value = /*$notes*/ ctx[1];
+        if (dirty & /*$notes, dayjs*/ 16) {
+          each_value = /*$notes*/ ctx[4];
           validate_each_argument(each_value);
           validate_each_keys(ctx, each_value, get_each_context, get_key);
           each_blocks = update_keyed_each(
@@ -6690,14 +7350,49 @@ var app = (function () {
             get_each_context,
           );
         }
+
+        if (
+          dirty & /*inputValues*/ 2 &&
+          input0.value !== /*inputValues*/ ctx[1].add.title
+        ) {
+          set_input_value(input0, /*inputValues*/ ctx[1].add.title);
+        }
+
+        if (
+          dirty & /*inputValues*/ 2 &&
+          input1.value !== /*inputValues*/ ctx[1].add.status
+        ) {
+          set_input_value(input1, /*inputValues*/ ctx[1].add.status);
+        }
+
+        if (
+          dirty & /*inputValues*/ 2 &&
+          input2.value !== /*inputValues*/ ctx[1].delete.noteNumber
+        ) {
+          set_input_value(input2, /*inputValues*/ ctx[1].delete.noteNumber);
+        }
+
+        if (/*$error*/ ctx[5]) {
+          if (if_block) {
+            if_block.p(ctx, dirty);
+          } else {
+            if_block = create_if_block_3(ctx);
+            if_block.c();
+            if_block.m(div9, null);
+          }
+        } else if (if_block) {
+          if_block.d(1);
+          if_block = null;
+        }
       },
       d: function destroy(detaching) {
-        if (detaching) detach_dev(div9);
+        if (detaching) detach_dev(div11);
 
         for (let i = 0; i < each_blocks.length; i += 1) {
           each_blocks[i].d();
         }
 
+        if (if_block) if_block.d();
         mounted = false;
         run_all(dispose);
       },
@@ -6705,32 +7400,33 @@ var app = (function () {
 
     dispatch_dev('SvelteRegisterBlock', {
       block,
-      id: create_if_block.name,
+      id: create_if_block_2.name,
       type: 'if',
-      source: '(68:2) {#if $isAuthenticated}',
+      source: '(74:4) {#if !$counter}',
       ctx,
     });
 
     return block;
   }
 
-  // (79:12) {#each $notes as note (note.id)}
+  // (85:14) {#each $notes as note (note.id)}
   function create_each_block(key_1, ctx) {
     let div4;
     let div0;
-    let t0_value = /*note*/ ctx[7].number + '';
+    let t0_value = /*note*/ ctx[15].number + '';
     let t0;
     let t1;
     let div1;
-    let t2_value = /*note*/ ctx[7].note_title + '';
+    let t2_value = /*note*/ ctx[15].note_title + '';
     let t2;
     let t3;
     let div2;
-    let t4_value = dateDisplay(/*note*/ ctx[7].creation_time) + '';
+    let t4_value =
+      dayjs_min(/*note*/ ctx[15].creation_time).format('YYYY-DD-MM HH:MM') + '';
     let t4;
     let t5;
     let div3;
-    let t6_value = /*note*/ ctx[7].status + '';
+    let t6_value = /*note*/ ctx[15].status + '';
     let t6;
     let t7;
 
@@ -6751,20 +7447,20 @@ var app = (function () {
         div3 = element('div');
         t6 = text(t6_value);
         t7 = space();
-        attr_dev(div0, 'class', 'cell svelte-fzxuqv');
+        attr_dev(div0, 'class', 'cell svelte-q64nj1');
         attr_dev(div0, 'data-title', 'Number');
-        add_location(div0, file, 80, 16, 2403);
-        attr_dev(div1, 'class', 'cell svelte-fzxuqv');
+        add_location(div0, file, 86, 18, 2443);
+        attr_dev(div1, 'class', 'cell svelte-q64nj1');
         attr_dev(div1, 'data-title', 'Title');
-        add_location(div1, file, 83, 16, 2513);
-        attr_dev(div2, 'class', 'cell svelte-fzxuqv');
+        add_location(div1, file, 89, 18, 2559);
+        attr_dev(div2, 'class', 'cell svelte-q64nj1');
         attr_dev(div2, 'data-title', 'Date');
-        add_location(div2, file, 86, 16, 2626);
-        attr_dev(div3, 'class', 'cell svelte-fzxuqv');
+        add_location(div2, file, 92, 18, 2678);
+        attr_dev(div3, 'class', 'cell svelte-q64nj1');
         attr_dev(div3, 'data-title', 'Status');
-        add_location(div3, file, 89, 16, 2754);
-        attr_dev(div4, 'class', 'row svelte-fzxuqv');
-        add_location(div4, file, 79, 14, 2369);
+        add_location(div3, file, 95, 18, 2833);
+        attr_dev(div4, 'class', 'row svelte-q64nj1');
+        add_location(div4, file, 85, 16, 2407);
         this.first = div4;
       },
       m: function mount(target, anchor) {
@@ -6785,24 +7481,27 @@ var app = (function () {
       p: function update(new_ctx, dirty) {
         ctx = new_ctx;
         if (
-          dirty & /*$notes*/ 2 &&
-          t0_value !== (t0_value = /*note*/ ctx[7].number + '')
+          dirty & /*$notes*/ 16 &&
+          t0_value !== (t0_value = /*note*/ ctx[15].number + '')
         )
           set_data_dev(t0, t0_value);
         if (
-          dirty & /*$notes*/ 2 &&
-          t2_value !== (t2_value = /*note*/ ctx[7].note_title + '')
+          dirty & /*$notes*/ 16 &&
+          t2_value !== (t2_value = /*note*/ ctx[15].note_title + '')
         )
           set_data_dev(t2, t2_value);
         if (
-          dirty & /*$notes*/ 2 &&
+          dirty & /*$notes*/ 16 &&
           t4_value !==
-            (t4_value = dateDisplay(/*note*/ ctx[7].creation_time) + '')
+            (t4_value =
+              dayjs_min(/*note*/ ctx[15].creation_time).format(
+                'YYYY-DD-MM HH:MM',
+              ) + '')
         )
           set_data_dev(t4, t4_value);
         if (
-          dirty & /*$notes*/ 2 &&
-          t6_value !== (t6_value = /*note*/ ctx[7].status + '')
+          dirty & /*$notes*/ 16 &&
+          t6_value !== (t6_value = /*note*/ ctx[15].status + '')
         )
           set_data_dev(t6, t6_value);
       },
@@ -6815,7 +7514,41 @@ var app = (function () {
       block,
       id: create_each_block.name,
       type: 'each',
-      source: '(79:12) {#each $notes as note (note.id)}',
+      source: '(85:14) {#each $notes as note (note.id)}',
+      ctx,
+    });
+
+    return block;
+  }
+
+  // (123:12) {#if $error}
+  function create_if_block_3(ctx) {
+    let h2;
+    let t;
+
+    const block = {
+      c: function create() {
+        h2 = element('h2');
+        t = text(/*$error*/ ctx[5]);
+        add_location(h2, file, 123, 14, 3952);
+      },
+      m: function mount(target, anchor) {
+        insert_dev(target, h2, anchor);
+        append_dev(h2, t);
+      },
+      p: function update(ctx, dirty) {
+        if (dirty & /*$error*/ 32) set_data_dev(t, /*$error*/ ctx[5]);
+      },
+      d: function destroy(detaching) {
+        if (detaching) detach_dev(h2);
+      },
+    };
+
+    dispatch_dev('SvelteRegisterBlock', {
+      block,
+      id: create_if_block_3.name,
+      type: 'if',
+      source: '(123:12) {#if $error}',
       ctx,
     });
 
@@ -6824,10 +7557,14 @@ var app = (function () {
 
   function create_fragment(ctx) {
     let main;
+    let mounted;
+    let dispose;
+    add_render_callback(/*onlinestatuschanged*/ ctx[10]);
 
     function select_block_type(ctx, dirty) {
-      if (/*$isAuthenticated*/ ctx[0]) return create_if_block;
-      return create_else_block;
+      if (!(/*online*/ ctx[0])) return create_if_block;
+      if (/*$isAuthenticated*/ ctx[2]) return create_if_block_1;
+      return create_else_block_1;
     }
 
     let current_block_type = select_block_type(ctx);
@@ -6837,7 +7574,7 @@ var app = (function () {
       c: function create() {
         main = element('main');
         if_block.c();
-        add_location(main, file, 66, 0, 1919);
+        add_location(main, file, 69, 0, 1865);
       },
       l: function claim(nodes) {
         throw new Error(
@@ -6847,6 +7584,15 @@ var app = (function () {
       m: function mount(target, anchor) {
         insert_dev(target, main, anchor);
         if_block.m(main, null);
+
+        if (!mounted) {
+          dispose = [
+            listen_dev(window, 'online', /*onlinestatuschanged*/ ctx[10]),
+            listen_dev(window, 'offline', /*onlinestatuschanged*/ ctx[10]),
+          ];
+
+          mounted = true;
+        }
       },
       p: function update(ctx, [dirty]) {
         if (
@@ -6870,6 +7616,8 @@ var app = (function () {
       d: function destroy(detaching) {
         if (detaching) detach_dev(main);
         if_block.d();
+        mounted = false;
+        run_all(dispose);
       },
     };
 
@@ -6884,26 +7632,32 @@ var app = (function () {
     return block;
   }
 
-  function dateDisplay(d) {
-    var datePart = d.substr(0, d.indexOf('T'));
-    var timePart = d.substr(d.indexOf('T') + 1, 5);
-    return datePart + ' ' + timePart;
-  }
-
   function instance($$self, $$props, $$invalidate) {
     let $isAuthenticated;
+    let $counter;
     let $notes;
+    let $error;
     validate_store(isAuthenticated, 'isAuthenticated');
     component_subscribe($$self, isAuthenticated, ($$value) =>
-      $$invalidate(0, ($isAuthenticated = $$value)),
+      $$invalidate(2, ($isAuthenticated = $$value)),
+    );
+    validate_store(counter, 'counter');
+    component_subscribe($$self, counter, ($$value) =>
+      $$invalidate(3, ($counter = $$value)),
     );
     validate_store(notes, 'notes');
     component_subscribe($$self, notes, ($$value) =>
-      $$invalidate(1, ($notes = $$value)),
+      $$invalidate(4, ($notes = $$value)),
+    );
+    validate_store(error, 'error');
+    component_subscribe($$self, error, ($$value) =>
+      $$invalidate(5, ($error = $$value)),
     );
     let { $$slots: slots = {}, $$scope } = $$props;
     validate_slots('App', slots, []);
     let auth0Client;
+    let online;
+    const inputValues = { add: {}, delete: {} };
 
     onMount(async () => {
       auth0Client = await auth.createClient();
@@ -6934,17 +7688,24 @@ var app = (function () {
     }
 
     const addNote = async () => {
-      const title = prompt('Note title') ?? '';
-      const status = prompt('Task status') ?? '';
-      if (title === '') return;
-      const { insert_notes_notes } = await requestRunner.startExecuteMyMutation(
-        OperationsDocsHelper.MUTATION_InsertOne(title, status),
-      );
-      notes.update((newNote) => [...newNote, insert_notes_notes.returning[0]]);
+      const { title, status } = inputValues.add;
+
+      try {
+        const { insert_notes_notes } =
+          await requestRunner.startExecuteMyMutation(
+            OperationsDocsHelper.MUTATION_InsertOne(title, status),
+          );
+        notes.update((newNote) => [
+          ...newNote,
+          insert_notes_notes.returning[0],
+        ]);
+      } catch (e) {
+        error.set(e.message);
+      }
     };
 
     const deleteNote = async () => {
-      const noteNumber = prompt("Notes' number to be deleted: ");
+      const { noteNumber } = inputValues.delete;
       await requestRunner.startExecuteMyMutation(
         OperationsDocsHelper.MUTATION_DeleteByNumber(),
         { number: parseInt(noteNumber) },
@@ -6965,6 +7726,25 @@ var app = (function () {
         console.warn(`<App> was created with unknown prop '${key}'`);
     });
 
+    function onlinestatuschanged() {
+      $$invalidate(0, (online = navigator.onLine));
+    }
+
+    function input0_input_handler() {
+      inputValues.add.title = this.value;
+      $$invalidate(1, inputValues);
+    }
+
+    function input1_input_handler() {
+      inputValues.add.status = this.value;
+      $$invalidate(1, inputValues);
+    }
+
+    function input2_input_handler() {
+      inputValues.delete.noteNumber = this.value;
+      $$invalidate(1, inputValues);
+    }
+
     $$self.$capture_state = () => ({
       requestRunner,
       OperationsDocsHelper,
@@ -6973,26 +7753,48 @@ var app = (function () {
       user,
       notes,
       token,
+      counter,
+      error,
       auth,
+      dayjs: dayjs_min,
       auth0Client,
+      online,
+      inputValues,
       login,
       logout,
       addNote,
       deleteNote,
-      dateDisplay,
       $isAuthenticated,
+      $counter,
       $notes,
+      $error,
     });
 
     $$self.$inject_state = ($$props) => {
       if ('auth0Client' in $$props) auth0Client = $$props.auth0Client;
+      if ('online' in $$props) $$invalidate(0, (online = $$props.online));
     };
 
     if ($$props && '$$inject' in $$props) {
       $$self.$inject_state($$props.$$inject);
     }
 
-    return [$isAuthenticated, $notes, login, logout, addNote, deleteNote];
+    return [
+      online,
+      inputValues,
+      $isAuthenticated,
+      $counter,
+      $notes,
+      $error,
+      login,
+      logout,
+      addNote,
+      deleteNote,
+      onlinestatuschanged,
+      input0_input_handler,
+      input1_input_handler,
+      input2_input_handler,
+    ];
   }
 
   class App extends SvelteComponentDev {

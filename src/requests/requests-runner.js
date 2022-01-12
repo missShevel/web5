@@ -18,6 +18,7 @@ class RequestRunner {
       return result.json();
     } catch (e) {
       console.error(e);
+      counter.update((n) => n - 1);
       throw new Error('Error with request sending');
     }
   }

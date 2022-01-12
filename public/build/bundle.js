@@ -35,6 +35,14 @@ var app = (function () {
       ? b == b
       : a !== b || (a && typeof a === 'object') || typeof a === 'function';
   }
+  let src_url_equal_anchor;
+  function src_url_equal(element_src, url) {
+    if (!src_url_equal_anchor) {
+      src_url_equal_anchor = document.createElement('a');
+    }
+    src_url_equal_anchor.href = url;
+    return element_src === src_url_equal_anchor.href;
+  }
   function is_empty(obj) {
     return Object.keys(obj).length === 0;
   }
@@ -75,9 +83,6 @@ var app = (function () {
   }
   function space() {
     return text(' ');
-  }
-  function empty() {
-    return text('');
   }
   function listen(node, event, handler, options) {
     node.addEventListener(event, handler, options);
@@ -609,6 +614,7 @@ var app = (function () {
         return result.json();
       } catch (e) {
         console.error(e);
+        counter.update((n) => n - 1);
         throw new Error('Error with request sending');
       }
     }
@@ -6921,8 +6927,8 @@ var app = (function () {
     return child_ctx;
   }
 
-  // (132:2) {:else}
-  function create_else_block_1(ctx) {
+  // (133:2) {:else}
+  function create_else_block(ctx) {
     let button;
     let mounted;
     let dispose;
@@ -6931,8 +6937,8 @@ var app = (function () {
       c: function create() {
         button = element('button');
         button.textContent = 'Login';
-        attr_dev(button, 'class', 'btn svelte-q64nj1');
-        add_location(button, file, 132, 4, 4096);
+        attr_dev(button, 'class', 'btn svelte-vzdre3');
+        add_location(button, file, 133, 4, 4035);
       },
       m: function mount(target, anchor) {
         insert_dev(target, button, anchor);
@@ -6959,9 +6965,9 @@ var app = (function () {
 
     dispatch_dev('SvelteRegisterBlock', {
       block,
-      id: create_else_block_1.name,
+      id: create_else_block.name,
       type: 'else',
-      source: '(132:2) {:else}',
+      source: '(133:2) {:else}',
       ctx,
     });
 
@@ -6970,45 +6976,335 @@ var app = (function () {
 
   // (73:29)
   function create_if_block_1(ctx) {
-    let if_block_anchor;
+    let t0;
+    let div11;
+    let div10;
+    let div9;
+    let div5;
+    let div4;
+    let div0;
+    let t2;
+    let div1;
+    let t4;
+    let div2;
+    let t6;
+    let div3;
+    let t8;
+    let each_blocks = [];
+    let each_1_lookup = new Map();
+    let t9;
+    let div6;
+    let h40;
+    let t11;
+    let p0;
+    let t13;
+    let input0;
+    let t14;
+    let input1;
+    let t15;
+    let button0;
+    let t17;
+    let div7;
+    let h41;
+    let t19;
+    let p1;
+    let t21;
+    let input2;
+    let t22;
+    let button1;
+    let t24;
+    let div8;
+    let button2;
+    let t26;
+    let mounted;
+    let dispose;
+    let if_block0 = /*$counter*/ ctx[3] && create_if_block_3(ctx);
+    let each_value = /*$notes*/ ctx[4];
+    validate_each_argument(each_value);
+    const get_key = (ctx) => /*note*/ ctx[15].id;
+    validate_each_keys(ctx, each_value, get_each_context, get_key);
 
-    function select_block_type_1(ctx, dirty) {
-      if (!(/*$counter*/ ctx[3])) return create_if_block_2;
-      return create_else_block;
+    for (let i = 0; i < each_value.length; i += 1) {
+      let child_ctx = get_each_context(ctx, each_value, i);
+      let key = get_key(child_ctx);
+      each_1_lookup.set(
+        key,
+        (each_blocks[i] = create_each_block(key, child_ctx)),
+      );
     }
 
-    let current_block_type = select_block_type_1(ctx);
-    let if_block = current_block_type(ctx);
+    let if_block1 = /*$error*/ ctx[5] && create_if_block_2(ctx);
 
     const block = {
       c: function create() {
-        if_block.c();
-        if_block_anchor = empty();
+        if (if_block0) if_block0.c();
+        t0 = space();
+        div11 = element('div');
+        div10 = element('div');
+        div9 = element('div');
+        div5 = element('div');
+        div4 = element('div');
+        div0 = element('div');
+        div0.textContent = '№';
+        t2 = space();
+        div1 = element('div');
+        div1.textContent = 'Title';
+        t4 = space();
+        div2 = element('div');
+        div2.textContent = 'Date';
+        t6 = space();
+        div3 = element('div');
+        div3.textContent = 'Status';
+        t8 = space();
+
+        for (let i = 0; i < each_blocks.length; i += 1) {
+          each_blocks[i].c();
+        }
+
+        t9 = space();
+        div6 = element('div');
+        h40 = element('h4');
+        h40.textContent = 'Add Note';
+        t11 = space();
+        p0 = element('p');
+        p0.textContent =
+          "If you want to add new note, please enter it's title and status";
+        t13 = space();
+        input0 = element('input');
+        t14 = space();
+        input1 = element('input');
+        t15 = space();
+        button0 = element('button');
+        button0.textContent = 'Add Note';
+        t17 = space();
+        div7 = element('div');
+        h41 = element('h4');
+        h41.textContent = 'Delete Note';
+        t19 = space();
+        p1 = element('p');
+        p1.textContent = "If you want to delete note, please enter it's number";
+        t21 = space();
+        input2 = element('input');
+        t22 = space();
+        button1 = element('button');
+        button1.textContent = 'Delete';
+        t24 = space();
+        div8 = element('div');
+        button2 = element('button');
+        button2.textContent = 'Logout';
+        t26 = space();
+        if (if_block1) if_block1.c();
+        attr_dev(div0, 'class', 'cell svelte-vzdre3');
+        add_location(div0, file, 83, 14, 2243);
+        attr_dev(div1, 'class', 'cell svelte-vzdre3');
+        add_location(div1, file, 84, 14, 2283);
+        attr_dev(div2, 'class', 'cell svelte-vzdre3');
+        add_location(div2, file, 85, 14, 2327);
+        attr_dev(div3, 'class', 'cell svelte-vzdre3');
+        add_location(div3, file, 86, 14, 2370);
+        attr_dev(div4, 'class', 'row header svelte-vzdre3');
+        add_location(div4, file, 82, 12, 2204);
+        attr_dev(div5, 'class', 'table svelte-vzdre3');
+        add_location(div5, file, 81, 10, 2172);
+        attr_dev(h40, 'class', 'svelte-vzdre3');
+        add_location(h40, file, 106, 12, 3079);
+        attr_dev(p0, 'class', 'svelte-vzdre3');
+        add_location(p0, file, 107, 12, 3109);
+        attr_dev(input0, 'placeholder', 'Title');
+        attr_dev(input0, 'class', 'svelte-vzdre3');
+        add_location(input0, file, 110, 12, 3220);
+        attr_dev(input1, 'placeholder', 'Status');
+        attr_dev(input1, 'class', 'svelte-vzdre3');
+        add_location(input1, file, 111, 12, 3297);
+        attr_dev(button0, 'class', 'btn svelte-vzdre3');
+        add_location(button0, file, 112, 12, 3376);
+        attr_dev(div6, 'class', 'props');
+        add_location(div6, file, 105, 10, 3047);
+        attr_dev(h41, 'class', 'svelte-vzdre3');
+        add_location(h41, file, 115, 12, 3492);
+        attr_dev(p1, 'class', 'svelte-vzdre3');
+        add_location(p1, file, 116, 12, 3525);
+        attr_dev(input2, 'placeholder', 'Number');
+        attr_dev(input2, 'class', 'svelte-vzdre3');
+        add_location(input2, file, 117, 12, 3597);
+        attr_dev(button1, 'class', 'btn svelte-vzdre3');
+        add_location(button1, file, 121, 12, 3723);
+        attr_dev(div7, 'class', 'props');
+        add_location(div7, file, 114, 10, 3460);
+        attr_dev(button2, 'class', 'btn svelte-vzdre3');
+        add_location(button2, file, 124, 12, 3842);
+        attr_dev(div8, 'class', 'buttons svelte-vzdre3');
+        add_location(div8, file, 123, 10, 3808);
+        attr_dev(div9, 'class', 'wrap-table100 svelte-vzdre3');
+        add_location(div9, file, 80, 8, 2134);
+        attr_dev(div10, 'class', 'container-table100 svelte-vzdre3');
+        add_location(div10, file, 79, 6, 2093);
+        attr_dev(div11, 'class', 'limiter svelte-vzdre3');
+        add_location(div11, file, 78, 4, 2065);
       },
       m: function mount(target, anchor) {
-        if_block.m(target, anchor);
-        insert_dev(target, if_block_anchor, anchor);
+        if (if_block0) if_block0.m(target, anchor);
+        insert_dev(target, t0, anchor);
+        insert_dev(target, div11, anchor);
+        append_dev(div11, div10);
+        append_dev(div10, div9);
+        append_dev(div9, div5);
+        append_dev(div5, div4);
+        append_dev(div4, div0);
+        append_dev(div4, t2);
+        append_dev(div4, div1);
+        append_dev(div4, t4);
+        append_dev(div4, div2);
+        append_dev(div4, t6);
+        append_dev(div4, div3);
+        append_dev(div5, t8);
+
+        for (let i = 0; i < each_blocks.length; i += 1) {
+          each_blocks[i].m(div5, null);
+        }
+
+        append_dev(div9, t9);
+        append_dev(div9, div6);
+        append_dev(div6, h40);
+        append_dev(div6, t11);
+        append_dev(div6, p0);
+        append_dev(div6, t13);
+        append_dev(div6, input0);
+        set_input_value(input0, /*inputValues*/ ctx[1].add.title);
+        append_dev(div6, t14);
+        append_dev(div6, input1);
+        set_input_value(input1, /*inputValues*/ ctx[1].add.status);
+        append_dev(div6, t15);
+        append_dev(div6, button0);
+        append_dev(div9, t17);
+        append_dev(div9, div7);
+        append_dev(div7, h41);
+        append_dev(div7, t19);
+        append_dev(div7, p1);
+        append_dev(div7, t21);
+        append_dev(div7, input2);
+        set_input_value(input2, /*inputValues*/ ctx[1].delete.noteNumber);
+        append_dev(div7, t22);
+        append_dev(div7, button1);
+        append_dev(div9, t24);
+        append_dev(div9, div8);
+        append_dev(div8, button2);
+        append_dev(div9, t26);
+        if (if_block1) if_block1.m(div9, null);
+
+        if (!mounted) {
+          dispose = [
+            listen_dev(input0, 'input', /*input0_input_handler*/ ctx[11]),
+            listen_dev(input1, 'input', /*input1_input_handler*/ ctx[12]),
+            listen_dev(
+              button0,
+              'click',
+              /*addNote*/ ctx[8],
+              false,
+              false,
+              false,
+            ),
+            listen_dev(input2, 'input', /*input2_input_handler*/ ctx[13]),
+            listen_dev(
+              button1,
+              'click',
+              /*deleteNote*/ ctx[9],
+              false,
+              false,
+              false,
+            ),
+            listen_dev(
+              button2,
+              'click',
+              /*logout*/ ctx[7],
+              false,
+              false,
+              false,
+            ),
+          ];
+
+          mounted = true;
+        }
       },
       p: function update(ctx, dirty) {
-        if (
-          current_block_type ===
-            (current_block_type = select_block_type_1(ctx)) &&
-          if_block
-        ) {
-          if_block.p(ctx, dirty);
-        } else {
-          if_block.d(1);
-          if_block = current_block_type(ctx);
-
-          if (if_block) {
-            if_block.c();
-            if_block.m(if_block_anchor.parentNode, if_block_anchor);
+        if (/*$counter*/ ctx[3]) {
+          if (if_block0);
+          else {
+            if_block0 = create_if_block_3(ctx);
+            if_block0.c();
+            if_block0.m(t0.parentNode, t0);
           }
+        } else if (if_block0) {
+          if_block0.d(1);
+          if_block0 = null;
+        }
+
+        if (dirty & /*$notes, dayjs*/ 16) {
+          each_value = /*$notes*/ ctx[4];
+          validate_each_argument(each_value);
+          validate_each_keys(ctx, each_value, get_each_context, get_key);
+          each_blocks = update_keyed_each(
+            each_blocks,
+            dirty,
+            get_key,
+            1,
+            ctx,
+            each_value,
+            each_1_lookup,
+            div5,
+            destroy_block,
+            create_each_block,
+            null,
+            get_each_context,
+          );
+        }
+
+        if (
+          dirty & /*inputValues*/ 2 &&
+          input0.value !== /*inputValues*/ ctx[1].add.title
+        ) {
+          set_input_value(input0, /*inputValues*/ ctx[1].add.title);
+        }
+
+        if (
+          dirty & /*inputValues*/ 2 &&
+          input1.value !== /*inputValues*/ ctx[1].add.status
+        ) {
+          set_input_value(input1, /*inputValues*/ ctx[1].add.status);
+        }
+
+        if (
+          dirty & /*inputValues*/ 2 &&
+          input2.value !== /*inputValues*/ ctx[1].delete.noteNumber
+        ) {
+          set_input_value(input2, /*inputValues*/ ctx[1].delete.noteNumber);
+        }
+
+        if (/*$error*/ ctx[5]) {
+          if (if_block1) {
+            if_block1.p(ctx, dirty);
+          } else {
+            if_block1 = create_if_block_2(ctx);
+            if_block1.c();
+            if_block1.m(div9, null);
+          }
+        } else if (if_block1) {
+          if_block1.d(1);
+          if_block1 = null;
         }
       },
       d: function destroy(detaching) {
-        if_block.d(detaching);
-        if (detaching) detach_dev(if_block_anchor);
+        if (if_block0) if_block0.d(detaching);
+        if (detaching) detach_dev(t0);
+        if (detaching) detach_dev(div11);
+
+        for (let i = 0; i < each_blocks.length; i += 1) {
+          each_blocks[i].d();
+        }
+
+        if (if_block1) if_block1.d();
+        mounted = false;
+        run_all(dispose);
       },
     };
 
@@ -7053,363 +7349,45 @@ var app = (function () {
     return block;
   }
 
-  // (129:4) {:else}
-  function create_else_block(ctx) {
-    let p;
+  // (74:4) {#if $counter}
+  function create_if_block_3(ctx) {
+    let div;
+    let img;
+    let img_src_value;
 
     const block = {
       c: function create() {
-        p = element('p');
-        p.textContent = 'is loading...';
-        attr_dev(p, 'class', 'svelte-q64nj1');
-        add_location(p, file, 129, 6, 4051);
+        div = element('div');
+        img = element('img');
+        if (!src_url_equal(img.src, (img_src_value = '/loader.gif')))
+          attr_dev(img, 'src', img_src_value);
+        attr_dev(img, 'alt', 'loader');
+        attr_dev(img, 'class', 'svelte-vzdre3');
+        add_location(img, file, 75, 8, 1999);
+        attr_dev(div, 'class', 'loader svelte-vzdre3');
+        add_location(div, file, 74, 6, 1970);
       },
       m: function mount(target, anchor) {
-        insert_dev(target, p, anchor);
+        insert_dev(target, div, anchor);
+        append_dev(div, img);
       },
-      p: noop,
       d: function destroy(detaching) {
-        if (detaching) detach_dev(p);
+        if (detaching) detach_dev(div);
       },
     };
 
     dispatch_dev('SvelteRegisterBlock', {
       block,
-      id: create_else_block.name,
-      type: 'else',
-      source: '(129:4) {:else}',
-      ctx,
-    });
-
-    return block;
-  }
-
-  // (74:4) {#if !$counter}
-  function create_if_block_2(ctx) {
-    let div11;
-    let div10;
-    let div9;
-    let div5;
-    let div4;
-    let div0;
-    let t1;
-    let div1;
-    let t3;
-    let div2;
-    let t5;
-    let div3;
-    let t7;
-    let each_blocks = [];
-    let each_1_lookup = new Map();
-    let t8;
-    let div6;
-    let h40;
-    let t10;
-    let p0;
-    let t12;
-    let input0;
-    let t13;
-    let input1;
-    let t14;
-    let button0;
-    let t16;
-    let div7;
-    let h41;
-    let t18;
-    let p1;
-    let t20;
-    let input2;
-    let t21;
-    let button1;
-    let t23;
-    let div8;
-    let button2;
-    let t25;
-    let mounted;
-    let dispose;
-    let each_value = /*$notes*/ ctx[4];
-    validate_each_argument(each_value);
-    const get_key = (ctx) => /*note*/ ctx[15].id;
-    validate_each_keys(ctx, each_value, get_each_context, get_key);
-
-    for (let i = 0; i < each_value.length; i += 1) {
-      let child_ctx = get_each_context(ctx, each_value, i);
-      let key = get_key(child_ctx);
-      each_1_lookup.set(
-        key,
-        (each_blocks[i] = create_each_block(key, child_ctx)),
-      );
-    }
-
-    let if_block = /*$error*/ ctx[5] && create_if_block_3(ctx);
-
-    const block = {
-      c: function create() {
-        div11 = element('div');
-        div10 = element('div');
-        div9 = element('div');
-        div5 = element('div');
-        div4 = element('div');
-        div0 = element('div');
-        div0.textContent = '№';
-        t1 = space();
-        div1 = element('div');
-        div1.textContent = 'Title';
-        t3 = space();
-        div2 = element('div');
-        div2.textContent = 'Date';
-        t5 = space();
-        div3 = element('div');
-        div3.textContent = 'Status';
-        t7 = space();
-
-        for (let i = 0; i < each_blocks.length; i += 1) {
-          each_blocks[i].c();
-        }
-
-        t8 = space();
-        div6 = element('div');
-        h40 = element('h4');
-        h40.textContent = 'Add Note';
-        t10 = space();
-        p0 = element('p');
-        p0.textContent =
-          "If you want to add new note, please enter it's title and status";
-        t12 = space();
-        input0 = element('input');
-        t13 = space();
-        input1 = element('input');
-        t14 = space();
-        button0 = element('button');
-        button0.textContent = 'Add Note';
-        t16 = space();
-        div7 = element('div');
-        h41 = element('h4');
-        h41.textContent = 'Delete Note';
-        t18 = space();
-        p1 = element('p');
-        p1.textContent = "If you want to delete note, please enter it's number";
-        t20 = space();
-        input2 = element('input');
-        t21 = space();
-        button1 = element('button');
-        button1.textContent = 'Delete';
-        t23 = space();
-        div8 = element('div');
-        button2 = element('button');
-        button2.textContent = 'Logout';
-        t25 = space();
-        if (if_block) if_block.c();
-        attr_dev(div0, 'class', 'cell svelte-q64nj1');
-        add_location(div0, file, 79, 16, 2159);
-        attr_dev(div1, 'class', 'cell svelte-q64nj1');
-        add_location(div1, file, 80, 16, 2201);
-        attr_dev(div2, 'class', 'cell svelte-q64nj1');
-        add_location(div2, file, 81, 16, 2247);
-        attr_dev(div3, 'class', 'cell svelte-q64nj1');
-        add_location(div3, file, 82, 16, 2292);
-        attr_dev(div4, 'class', 'row header svelte-q64nj1');
-        add_location(div4, file, 78, 14, 2118);
-        attr_dev(div5, 'class', 'table svelte-q64nj1');
-        add_location(div5, file, 77, 12, 2084);
-        attr_dev(h40, 'class', 'svelte-q64nj1');
-        add_location(h40, file, 102, 14, 3041);
-        attr_dev(p0, 'class', 'svelte-q64nj1');
-        add_location(p0, file, 103, 14, 3073);
-        attr_dev(input0, 'placeholder', 'Title');
-        attr_dev(input0, 'class', 'svelte-q64nj1');
-        add_location(input0, file, 106, 14, 3190);
-        attr_dev(input1, 'placeholder', 'Status');
-        attr_dev(input1, 'class', 'svelte-q64nj1');
-        add_location(input1, file, 107, 14, 3269);
-        attr_dev(button0, 'class', 'btn svelte-q64nj1');
-        add_location(button0, file, 108, 14, 3350);
-        attr_dev(div6, 'class', 'props');
-        add_location(div6, file, 101, 12, 3007);
-        attr_dev(h41, 'class', 'svelte-q64nj1');
-        add_location(h41, file, 111, 14, 3472);
-        attr_dev(p1, 'class', 'svelte-q64nj1');
-        add_location(p1, file, 112, 14, 3507);
-        attr_dev(input2, 'placeholder', 'Number');
-        attr_dev(input2, 'class', 'svelte-q64nj1');
-        add_location(input2, file, 113, 14, 3581);
-        attr_dev(button1, 'class', 'btn svelte-q64nj1');
-        add_location(button1, file, 117, 14, 3715);
-        attr_dev(div7, 'class', 'props');
-        add_location(div7, file, 110, 12, 3438);
-        attr_dev(button2, 'class', 'btn svelte-q64nj1');
-        add_location(button2, file, 120, 14, 3840);
-        attr_dev(div8, 'class', 'buttons svelte-q64nj1');
-        add_location(div8, file, 119, 12, 3804);
-        attr_dev(div9, 'class', 'wrap-table100 svelte-q64nj1');
-        add_location(div9, file, 76, 10, 2044);
-        attr_dev(div10, 'class', 'container-table100 svelte-q64nj1');
-        add_location(div10, file, 75, 8, 2001);
-        attr_dev(div11, 'class', 'limiter svelte-q64nj1');
-        add_location(div11, file, 74, 6, 1971);
-      },
-      m: function mount(target, anchor) {
-        insert_dev(target, div11, anchor);
-        append_dev(div11, div10);
-        append_dev(div10, div9);
-        append_dev(div9, div5);
-        append_dev(div5, div4);
-        append_dev(div4, div0);
-        append_dev(div4, t1);
-        append_dev(div4, div1);
-        append_dev(div4, t3);
-        append_dev(div4, div2);
-        append_dev(div4, t5);
-        append_dev(div4, div3);
-        append_dev(div5, t7);
-
-        for (let i = 0; i < each_blocks.length; i += 1) {
-          each_blocks[i].m(div5, null);
-        }
-
-        append_dev(div9, t8);
-        append_dev(div9, div6);
-        append_dev(div6, h40);
-        append_dev(div6, t10);
-        append_dev(div6, p0);
-        append_dev(div6, t12);
-        append_dev(div6, input0);
-        set_input_value(input0, /*inputValues*/ ctx[1].add.title);
-        append_dev(div6, t13);
-        append_dev(div6, input1);
-        set_input_value(input1, /*inputValues*/ ctx[1].add.status);
-        append_dev(div6, t14);
-        append_dev(div6, button0);
-        append_dev(div9, t16);
-        append_dev(div9, div7);
-        append_dev(div7, h41);
-        append_dev(div7, t18);
-        append_dev(div7, p1);
-        append_dev(div7, t20);
-        append_dev(div7, input2);
-        set_input_value(input2, /*inputValues*/ ctx[1].delete.noteNumber);
-        append_dev(div7, t21);
-        append_dev(div7, button1);
-        append_dev(div9, t23);
-        append_dev(div9, div8);
-        append_dev(div8, button2);
-        append_dev(div9, t25);
-        if (if_block) if_block.m(div9, null);
-
-        if (!mounted) {
-          dispose = [
-            listen_dev(input0, 'input', /*input0_input_handler*/ ctx[11]),
-            listen_dev(input1, 'input', /*input1_input_handler*/ ctx[12]),
-            listen_dev(
-              button0,
-              'click',
-              /*addNote*/ ctx[8],
-              false,
-              false,
-              false,
-            ),
-            listen_dev(input2, 'input', /*input2_input_handler*/ ctx[13]),
-            listen_dev(
-              button1,
-              'click',
-              /*deleteNote*/ ctx[9],
-              false,
-              false,
-              false,
-            ),
-            listen_dev(
-              button2,
-              'click',
-              /*logout*/ ctx[7],
-              false,
-              false,
-              false,
-            ),
-          ];
-
-          mounted = true;
-        }
-      },
-      p: function update(ctx, dirty) {
-        if (dirty & /*$notes, dayjs*/ 16) {
-          each_value = /*$notes*/ ctx[4];
-          validate_each_argument(each_value);
-          validate_each_keys(ctx, each_value, get_each_context, get_key);
-          each_blocks = update_keyed_each(
-            each_blocks,
-            dirty,
-            get_key,
-            1,
-            ctx,
-            each_value,
-            each_1_lookup,
-            div5,
-            destroy_block,
-            create_each_block,
-            null,
-            get_each_context,
-          );
-        }
-
-        if (
-          dirty & /*inputValues*/ 2 &&
-          input0.value !== /*inputValues*/ ctx[1].add.title
-        ) {
-          set_input_value(input0, /*inputValues*/ ctx[1].add.title);
-        }
-
-        if (
-          dirty & /*inputValues*/ 2 &&
-          input1.value !== /*inputValues*/ ctx[1].add.status
-        ) {
-          set_input_value(input1, /*inputValues*/ ctx[1].add.status);
-        }
-
-        if (
-          dirty & /*inputValues*/ 2 &&
-          input2.value !== /*inputValues*/ ctx[1].delete.noteNumber
-        ) {
-          set_input_value(input2, /*inputValues*/ ctx[1].delete.noteNumber);
-        }
-
-        if (/*$error*/ ctx[5]) {
-          if (if_block) {
-            if_block.p(ctx, dirty);
-          } else {
-            if_block = create_if_block_3(ctx);
-            if_block.c();
-            if_block.m(div9, null);
-          }
-        } else if (if_block) {
-          if_block.d(1);
-          if_block = null;
-        }
-      },
-      d: function destroy(detaching) {
-        if (detaching) detach_dev(div11);
-
-        for (let i = 0; i < each_blocks.length; i += 1) {
-          each_blocks[i].d();
-        }
-
-        if (if_block) if_block.d();
-        mounted = false;
-        run_all(dispose);
-      },
-    };
-
-    dispatch_dev('SvelteRegisterBlock', {
-      block,
-      id: create_if_block_2.name,
+      id: create_if_block_3.name,
       type: 'if',
-      source: '(74:4) {#if !$counter}',
+      source: '(74:4) {#if $counter}',
       ctx,
     });
 
     return block;
   }
 
-  // (85:14) {#each $notes as note (note.id)}
+  // (89:12) {#each $notes as note (note.id)}
   function create_each_block(key_1, ctx) {
     let div4;
     let div0;
@@ -7447,20 +7425,20 @@ var app = (function () {
         div3 = element('div');
         t6 = text(t6_value);
         t7 = space();
-        attr_dev(div0, 'class', 'cell svelte-q64nj1');
+        attr_dev(div0, 'class', 'cell svelte-vzdre3');
         attr_dev(div0, 'data-title', 'Number');
-        add_location(div0, file, 86, 18, 2443);
-        attr_dev(div1, 'class', 'cell svelte-q64nj1');
+        add_location(div0, file, 90, 16, 2513);
+        attr_dev(div1, 'class', 'cell svelte-vzdre3');
         attr_dev(div1, 'data-title', 'Title');
-        add_location(div1, file, 89, 18, 2559);
-        attr_dev(div2, 'class', 'cell svelte-q64nj1');
+        add_location(div1, file, 93, 16, 2623);
+        attr_dev(div2, 'class', 'cell svelte-vzdre3');
         attr_dev(div2, 'data-title', 'Date');
-        add_location(div2, file, 92, 18, 2678);
-        attr_dev(div3, 'class', 'cell svelte-q64nj1');
+        add_location(div2, file, 96, 16, 2736);
+        attr_dev(div3, 'class', 'cell svelte-vzdre3');
         attr_dev(div3, 'data-title', 'Status');
-        add_location(div3, file, 95, 18, 2833);
-        attr_dev(div4, 'class', 'row svelte-q64nj1');
-        add_location(div4, file, 85, 16, 2407);
+        add_location(div3, file, 99, 16, 2885);
+        attr_dev(div4, 'class', 'row svelte-vzdre3');
+        add_location(div4, file, 89, 14, 2479);
         this.first = div4;
       },
       m: function mount(target, anchor) {
@@ -7514,15 +7492,15 @@ var app = (function () {
       block,
       id: create_each_block.name,
       type: 'each',
-      source: '(85:14) {#each $notes as note (note.id)}',
+      source: '(89:12) {#each $notes as note (note.id)}',
       ctx,
     });
 
     return block;
   }
 
-  // (123:12) {#if $error}
-  function create_if_block_3(ctx) {
+  // (127:10) {#if $error}
+  function create_if_block_2(ctx) {
     let h2;
     let t;
 
@@ -7530,7 +7508,7 @@ var app = (function () {
       c: function create() {
         h2 = element('h2');
         t = text(/*$error*/ ctx[5]);
-        add_location(h2, file, 123, 14, 3952);
+        add_location(h2, file, 127, 12, 3948);
       },
       m: function mount(target, anchor) {
         insert_dev(target, h2, anchor);
@@ -7546,9 +7524,9 @@ var app = (function () {
 
     dispatch_dev('SvelteRegisterBlock', {
       block,
-      id: create_if_block_3.name,
+      id: create_if_block_2.name,
       type: 'if',
-      source: '(123:12) {#if $error}',
+      source: '(127:10) {#if $error}',
       ctx,
     });
 
@@ -7564,7 +7542,7 @@ var app = (function () {
     function select_block_type(ctx, dirty) {
       if (!(/*online*/ ctx[0])) return create_if_block;
       if (/*$isAuthenticated*/ ctx[2]) return create_if_block_1;
-      return create_else_block_1;
+      return create_else_block;
     }
 
     let current_block_type = select_block_type(ctx);

@@ -71,64 +71,65 @@
   {#if !online}
     <h1>You r offline</h1>
   {:else if $isAuthenticated}
-    {#if !$counter}
-      <div class="limiter">
-        <div class="container-table100">
-          <div class="wrap-table100">
-            <div class="table">
-              <div class="row header">
-                <div class="cell">№</div>
-                <div class="cell">Title</div>
-                <div class="cell">Date</div>
-                <div class="cell">Status</div>
-              </div>
-              {#each $notes as note (note.id)}
-                <div class="row">
-                  <div class="cell" data-title="Number">
-                    {note.number}
-                  </div>
-                  <div class="cell" data-title="Title">
-                    {note.note_title}
-                  </div>
-                  <div class="cell" data-title="Date">
-                    {dayjs(note.creation_time).format('YYYY-DD-MM HH:MM')}
-                  </div>
-                  <div class="cell" data-title="Status">
-                    {note.status}
-                  </div>
+    {#if $counter}
+      <div class="loader">
+        <img src="/loader.gif" alt="loader" />
+      </div>
+    {/if}
+    <div class="limiter">
+      <div class="container-table100">
+        <div class="wrap-table100">
+          <div class="table">
+            <div class="row header">
+              <div class="cell">№</div>
+              <div class="cell">Title</div>
+              <div class="cell">Date</div>
+              <div class="cell">Status</div>
+            </div>
+            {#each $notes as note (note.id)}
+              <div class="row">
+                <div class="cell" data-title="Number">
+                  {note.number}
                 </div>
-              {/each}
-            </div>
-            <div class="props">
-              <h4>Add Note</h4>
-              <p>
-                If you want to add new note, please enter it's title and status
-              </p>
-              <input placeholder="Title" bind:value={inputValues.add.title} />
-              <input placeholder="Status" bind:value={inputValues.add.status} />
-              <button class="btn" on:click={addNote}>Add Note</button>
-            </div>
-            <div class="props">
-              <h4>Delete Note</h4>
-              <p>If you want to delete note, please enter it's number</p>
-              <input
-                placeholder="Number"
-                bind:value={inputValues.delete.noteNumber}
-              />
-              <button class="btn" on:click={deleteNote}>Delete</button>
-            </div>
-            <div class="buttons">
-              <button class="btn" on:click={logout}>Logout</button>
-            </div>
-            {#if $error}
-              <h2>{$error}</h2>
-            {/if}
+                <div class="cell" data-title="Title">
+                  {note.note_title}
+                </div>
+                <div class="cell" data-title="Date">
+                  {dayjs(note.creation_time).format('YYYY-DD-MM HH:MM')}
+                </div>
+                <div class="cell" data-title="Status">
+                  {note.status}
+                </div>
+              </div>
+            {/each}
           </div>
+          <div class="props">
+            <h4>Add Note</h4>
+            <p>
+              If you want to add new note, please enter it's title and status
+            </p>
+            <input placeholder="Title" bind:value={inputValues.add.title} />
+            <input placeholder="Status" bind:value={inputValues.add.status} />
+            <button class="btn" on:click={addNote}>Add Note</button>
+          </div>
+          <div class="props">
+            <h4>Delete Note</h4>
+            <p>If you want to delete note, please enter it's number</p>
+            <input
+              placeholder="Number"
+              bind:value={inputValues.delete.noteNumber}
+            />
+            <button class="btn" on:click={deleteNote}>Delete</button>
+          </div>
+          <div class="buttons">
+            <button class="btn" on:click={logout}>Logout</button>
+          </div>
+          {#if $error}
+            <h2>{$error}</h2>
+          {/if}
         </div>
       </div>
-    {:else}
-      <p>is loading...</p>
-    {/if}
+    </div>
   {:else}
     <button class="btn" on:click={login}>Login</button>
   {/if}
@@ -163,6 +164,16 @@
     padding: 5px;
     font-family: Poppins, sans-serif;
     font-size: 16px;
+  }
+
+  .loader {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+  }
+  .loader img {
+    width: 100%;
+    height: 100%;
   }
 
   .container-table100 {
